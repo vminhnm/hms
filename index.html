@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nhân sự bệnh viện</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#10302e;--paper:#f4f6f5;--card:#fff;--teal:#0d7c73;--teal-d:#095a53;--line:#d8dfdd;--mute:#5d716f;--bad:#b3402a;--warn:#a9740b;--ok:#1d7a45}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 'Be Vietnam Pro',system-ui,sans-serif;background:var(--paper);color:var(--ink)}
+button,input,select{font:inherit}
+.hide{display:none!important}
+/* đăng nhập */
+#login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+#login .brand{background:var(--ink);color:#e6f2f0;padding:64px;display:flex;flex-direction:column;justify-content:flex-end}
+#login .brand h1{font-size:44px;line-height:1.1;margin:0 0 12px;font-weight:700}
+#login .brand p{max-width:34ch;color:#9cc2bd;margin:0}
+#login form{align-self:center;justify-self:center;width:min(340px,86%);display:grid;gap:14px}
+#login h2{margin:0 0 4px}
+/* khung chính */
+#app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+nav{background:var(--ink);color:#cfe3e0;padding:20px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+nav .who{padding:4px 10px 18px;border-bottom:1px solid #27504d;margin-bottom:10px}
+nav .who b{display:block;color:#fff}
+nav .who span{font-size:13px;color:#8fb5b0}
+nav button{background:none;border:0;color:inherit;text-align:left;padding:9px 12px;border-radius:6px;cursor:pointer}
+nav button:hover{background:#1b4744}
+nav button.on{background:var(--teal);color:#fff}
+nav .out{margin-top:auto}
+main{padding:28px 32px;max-width:1200px;width:100%}
+h2.t{margin:0 0 18px;font-size:24px}
+h3{margin:26px 0 10px;font-size:17px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
+label{display:grid;gap:4px;font-size:13px;color:var(--mute);font-weight:500}
+input,select{padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);min-width:140px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.btn{background:var(--teal);color:#fff;border:0;padding:9px 16px;border-radius:6px;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--teal-d)}
+.btn.ghost{background:#fff;color:var(--teal-d);border:1px solid var(--line)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.bad{background:#fff;color:var(--bad);border:1px solid var(--line)}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:13px;color:var(--mute);font-weight:600;background:#fafcfb}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.empty{padding:26px;color:var(--mute)}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12.5px;font-weight:600;background:#e4efed;color:var(--teal-d)}
+.tag.late,.tag.early_leave,.tag.late_and_early,.tag.draft{background:#fbeccb;color:var(--warn)}
+.tag.absent{background:#f6dcd5;color:var(--bad)}
+.tag.approved,.tag.paid,.tag.on_time{background:#d9efe2;color:var(--ok)}
+.tag.pending{background:#e9eded;color:var(--mute)}
+.info{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.info div{background:#fff;padding:12px 16px}
+.info small{display:block;color:var(--mute)}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:8px;max-width:420px;box-shadow:0 6px 24px #0003}
+#toast.err{background:var(--bad)}
+dialog{border:0;border-radius:10px;padding:24px;width:min(440px,92vw);box-shadow:0 12px 48px #0004}
+dialog::backdrop{background:#10302e88}
+dialog form{display:grid;gap:12px}
+dialog input,dialog select{width:100%}
+.chk{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.chk input{min-width:0;width:auto}
+.multi{max-height:180px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;display:grid;gap:4px}
+@media(max-width:760px){#login{grid-template-columns:1fr}#login .brand{padding:32px;min-height:200px}#app{grid-template-columns:1fr}nav{position:static;height:auto;flex-direction:row;flex-wrap:wrap}nav .who{display:none}nav .out{margin:0}main{padding:18px}}
+</style>
+</head>
+<body>
+<section id="login">
+  <div class="brand"><h1>Nhân sự<br>bệnh viện</h1><p>Phân ca, chấm công và tính lương trong một nơi.</p></div>
+  <form id="loginForm">
+    <h2>Đăng nhập</h2>
+    <label>Tên đăng nhập<input name="username" autocomplete="username" required></label>
+    <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="btn">Đăng nhập</button>
+    <small style="color:var(--mute)">Dữ liệu mẫu: <b>hr</b>, <b>ketoan</b>, <b>nv001</b> / 123456</small>
+  </form>
+</section>
+
+<div id="app" class="hide">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<dialog id="dlg"></dialog>
+<div id="toast" class="hide"></div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const money = (n) => Number(n || 0).toLocaleString('vi-VN') + ' ₫';
+const dt = (d) => d ? new Date(d).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+const addDays = (n) => new Date(new Date(today()).getTime() + n * 864e5).toISOString().slice(0, 10);
+const STATUS = { pending: 'Chờ chấm', on_time: 'Đúng giờ', late: 'Đi muộn', early_leave: 'Về sớm', late_and_early: 'Muộn + sớm', absent: 'Vắng', draft: 'Chờ duyệt', approved: 'Đã duyệt', paid: 'Đã trả' };
+const tag = (s) => `<span class="tag ${s}">${STATUS[s] || s}</span>`;
+
+let token = localStorage.getItem('tk'), access = localStorage.getItem('ac'), uname = localStorage.getItem('nm');
+
+async function api(path, method = 'GET', body) {
+  const r = await fetch('/api' + path, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && token) { logout(); }
+  if (!r.ok) throw new Error(j.error || 'Có lỗi xảy ra');
+  return j;
+}
+function toast(msg, err) {
+  const t = $('#toast'); t.textContent = msg; t.className = err ? 'err' : ''; clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.add('hide'), 3800);
+}
+const act = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
+
+function table(cols, rows, empty = 'Chưa có dữ liệu') {
+  if (!rows.length) return `<div class="tbl"><div class="empty">${empty}</div></div>`;
+  return `<div class="tbl"><table><thead><tr>${cols.map((c) => `<th class="${c.n ? 'n' : ''}">${c.h}</th>`).join('')}</tr></thead><tbody>${
+    rows.map((r) => `<tr>${cols.map((c) => `<td class="${c.n ? 'n' : ''}">${c.f(r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ---------- Đăng nhập / điều hướng ---------- */
+$('#loginForm').onsubmit = act(async (e) => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target));
+  const r = await api('/login', 'POST', f);
+  token = r.token; access = r.access; uname = r.name;
+  localStorage.setItem('tk', token); localStorage.setItem('ac', access); localStorage.setItem('nm', uname);
+  boot();
+});
+function logout() { localStorage.clear(); location.reload(); }
+
+const MENUS = {
+  employee: [['me', 'Cá nhân']],
+  hr: [['me', 'Cá nhân'], ['employees', 'Nhân viên'], ['catalog', 'Danh mục'], ['assign', 'Phân ca'], ['attendance', 'Chấm công'], ['reports', 'Báo cáo']],
+  accountant: [['me', 'Cá nhân'], ['payroll', 'Bảng lương'], ['reports', 'Báo cáo']],
+};
+const ROLE_NAME = { employee: 'Nhân viên', hr: 'Nhân sự / Quản lý', accountant: 'Kế toán lương' };
+function boot() {
+  if (!token) return;
+  $('#login').classList.add('hide'); $('#app').classList.remove('hide');
+  $('#nav').innerHTML = `<div class="who"><b>${esc(uname)}</b><span>${ROLE_NAME[access]}</span></div>` +
+    MENUS[access].map(([k, l]) => `<button data-v="${k}">${l}</button>`).join('') + `<button class="out" id="out">Đăng xuất</button>`;
+  $('#nav').onclick = (e) => { const v = e.target.dataset.v; if (v) go(v); };
+  $('#out').onclick = logout;
+  go(location.hash.slice(1) && MENUS[access].some(([k]) => k === location.hash.slice(1)) ? location.hash.slice(1) : 'me');
+}
+function go(v) {
+  location.hash = v;
+  document.querySelectorAll('nav button[data-v]').forEach((b) => b.classList.toggle('on', b.dataset.v === v));
+  $('#main').innerHTML = '<div class="empty">Đang tải…</div>';
+  act(views[v])();
+}
+
+/* ---------- Form modal dùng chung ---------- */
+function form(title, fields, data, onSave) {
+  const d = $('#dlg');
+  d.innerHTML = `<form method="dialog"><h3 style="margin:0">${title}</h3>${fields.map((f) => {
+    const v = data?.[f.k] ?? '';
+    if (f.t === 'select') return `<label>${f.l}<select name="${f.k}" ${f.req === false ? '' : 'required'}>${f.req === false ? '<option value=""></option>' : ''}${f.opts.map((o) => `<option value="${o.v}" ${String(o.v) === String(v) ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select></label>`;
+    if (f.t === 'checkbox') return `<label class="chk"><input type="checkbox" name="${f.k}" ${v === '' || v ? 'checked' : ''}> ${f.l}</label>`;
+    return `<label>${f.l}<input name="${f.k}" type="${f.t || 'text'}" value="${esc(f.t === 'password' ? '' : v)}" ${f.req === false ? '' : 'required'} ${f.step ? `step="${f.step}"` : ''} ${f.ph ? `placeholder="${f.ph}"` : ''}></label>`;
+  }).join('')}<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn ghost" id="x">Hủy</button><button class="btn">Lưu</button></div></form>`;
+  d.showModal();
+  $('#x', d).onclick = () => d.close();
+  $('form', d).onsubmit = act(async (e) => {
+    e.preventDefault();
+    const o = {};
+    fields.forEach((f) => { const el = e.target.elements[f.k]; o[f.k] = f.t === 'checkbox' ? el.checked : f.t === 'number' ? Number(el.value) : el.value; });
+    await onSave(o); d.close();
+  });
+}
+
+/* ---------- Cá nhân ---------- */
+const views = {};
+views.me = async () => {
+  const m = await api('/me');
+  const month = today().slice(0, 7);
+  const [sch, pay] = await Promise.all([api(`/schedule?from=${addDays(-3)}&to=${addDays(14)}&mine=1`), api('/payroll?month=' + month)]);
+  const now = Date.now();
+  $('#main').innerHTML = `<h2 class="t">Xin chào, ${esc(m.fullName)}</h2>
+  <div class="info">
+    <div><small>Mã nhân viên</small>${esc(m.code)}</div><div><small>Khoa / phòng</small>${esc(m.department?.name)}</div>
+    <div><small>Vai trò</small>${esc(m.role?.title)}</div><div><small>Số điện thoại</small>${esc(m.phone || '—')}</div>
+    <div><small>Ngày sinh</small>${m.dob ? new Date(m.dob).toLocaleDateString('vi-VN') : '—'}</div><div><small>Trạng thái</small>${m.active ? 'Đang làm việc' : 'Đã nghỉ'}</div>
+  </div>
+  <h3>Lịch trực và chấm công (3 ngày trước đến 14 ngày tới)</h3>
+  ${table([
+    { h: 'Ngày', f: (r) => r.schedule.date.split('-').reverse().join('/') },
+    { h: 'Ca', f: (r) => `${esc(r.schedule.shift.name)} (${r.schedule.shift.start}–${r.schedule.shift.end})` },
+    { h: 'Vào', f: (r) => dt(r.checkIn) }, { h: 'Ra', f: (r) => dt(r.checkOut) },
+    { h: 'Trạng thái', f: (r) => tag(r.status) },
+    { h: '', f: (r) => r.schedule.date === today() || r.schedule.date === addDays(-1)
+        ? (!r.checkIn ? `<button class="btn sm" data-in="${r.schedule._id}">Check-in</button>` : !r.checkOut ? `<button class="btn sm" data-out="${r.schedule._id}">Check-out</button>` : '') : '' },
+  ], sch, 'Bạn chưa được phân ca nào trong khoảng này')}
+  <h3>Lương tháng ${month}</h3>
+  ${table([
+    { h: 'Tiền ca', n: 1, f: (r) => money(r.totalShiftPay) }, { h: 'Phụ cấp', n: 1, f: (r) => money(r.allowanceSnapshot) },
+    { h: 'Phạt', n: 1, f: (r) => money(r.totalFines) }, { h: 'Thực nhận', n: 1, f: (r) => `<b>${money(r.netSalary)}</b>` }, { h: 'Trạng thái', f: (r) => tag(r.status) },
+  ], pay, 'Chưa có bảng lương cho tháng này')}`;
+  $('#main').onclick = act(async (e) => {
+    const i = e.target.dataset.in, o = e.target.dataset.out;
+    if (i || o) { await api('/attendance/' + (i ? 'checkin' : 'checkout'), 'POST', { scheduleId: i || o }); toast(i ? 'Đã check-in' : 'Đã check-out'); views.me(); }
+  });
+};
+
+/* ---------- CRUD ---------- */
+async function crudView(box, title, ep, cols, fieldsFn, cell = (x) => x) {
+  const [rows, fields] = await Promise.all([api(ep), fieldsFn()]);
+  box.innerHTML = `<div class="bar"><h3 style="margin:0;flex:1">${title}</h3><button class="btn" id="add">Thêm</button></div>` +
+    table([...cols, { h: '', f: (r) => `<button class="btn ghost sm" data-e="${r._id}">Sửa</button> <button class="btn bad sm" data-d="${r._id}">Xóa</button>` }], rows);
+  const reload = () => crudView(box, title, ep, cols, fieldsFn, cell);
+  $('#add', box).onclick = () => form('Thêm mới', fields, null, async (o) => { await api(ep, 'POST', o); toast('Đã thêm'); reload(); });
+  box.onclick = act(async (e) => {
+    const id = e.target.dataset.e || e.target.dataset.d; if (!id) return;
+    const row = rows.find((r) => r._id === id);
+    if (e.target.dataset.d) { if (confirm('Xóa bản ghi này?')) { await api(`${ep}/${id}`, 'DELETE'); toast('Đã xóa'); reload(); } }
+    else form('Chỉnh sửa', fields, cell(row), async (o) => { await api(`${ep}/${id}`, 'PUT', o); toast('Đã lưu'); reload(); });
+  });
+}
+const opts = async (ep, l) => (await api(ep)).map((x) => ({ v: x._id, l: l(x) }));
+
+views.employees = () => {
+  $('#main').innerHTML = '<h2 class="t">Hồ sơ nhân viên</h2><div id="box"></div>';
+  return crudView($('#box'), 'Danh sách nhân viên', '/employees', [
+    { h: 'Mã', f: (r) => esc(r.code) }, { h: 'Họ tên', f: (r) => esc(r.fullName) }, { h: 'SĐT', f: (r) => esc(r.phone || '—') },
+    { h: 'Khoa/phòng', f: (r) => esc(r.department?.name) }, { h: 'Vai trò', f: (r) => esc(r.role?.title) },
+    { h: 'Quyền', f: (r) => ROLE_NAME[r.access] }, { h: 'Trạng thái', f: (r) => r.active ? 'Đang làm' : 'Đã nghỉ' },
+  ], async () => [
+    { k: 'code', l: 'Mã nhân viên' }, { k: 'fullName', l: 'Họ và tên' }, { k: 'dob', l: 'Ngày sinh', t: 'date', req: false }, { k: 'phone', l: 'Số điện thoại', req: false },
+    { k: 'department', l: 'Khoa/phòng', t: 'select', opts: await opts('/departments', (d) => d.name) },
+    { k: 'role', l: 'Vai trò', t: 'select', opts: await opts('/roles', (r) => r.title) },
+    { k: 'username', l: 'Tên đăng nhập', req: false }, { k: 'password', l: 'Mật khẩu (bỏ trống nếu không đổi)', t: 'password', req: false },
+    { k: 'access', l: 'Quyền hệ thống', t: 'select', opts: Object.entries(ROLE_NAME).map(([v, l]) => ({ v, l })) },
+    { k: 'active', l: 'Đang làm việc', t: 'checkbox' },
+  ], (r) => ({ ...r, department: r.department?._id, role: r.role?._id, dob: r.dob?.slice(0, 10) }));
+};
+views.catalog = async () => {
+  $('#main').innerHTML = '<h2 class="t">Danh mục</h2><div id="b1"></div><div id="b2" style="margin-top:20px"></div><div id="b3" style="margin-top:20px"></div>';
+  await crudView($('#b1'), 'Khoa / phòng', '/departments', [{ h: 'Tên', f: (r) => esc(r.name) }], async () => [{ k: 'name', l: 'Tên khoa/phòng' }]);
+  await crudView($('#b2'), 'Vai trò và định mức', '/roles', [
+    { h: 'Chức vụ', f: (r) => esc(r.title) }, { h: 'Lương cơ bản', n: 1, f: (r) => money(r.baseRate) }, { h: 'Phụ cấp', n: 1, f: (r) => money(r.allowance) },
+  ], async () => [{ k: 'title', l: 'Tên chức vụ' }, { k: 'baseRate', l: 'Lương cơ bản', t: 'number' }, { k: 'allowance', l: 'Phụ cấp', t: 'number' }]);
+  await crudView($('#b3'), 'Ca trực', '/shifts', [
+    { h: 'Ca', f: (r) => esc(r.name) }, { h: 'Giờ', f: (r) => `${r.start} – ${r.end}` }, { h: 'Hệ số', n: 1, f: (r) => r.multiplier },
+  ], async () => [{ k: 'name', l: 'Tên ca' }, { k: 'start', l: 'Giờ bắt đầu', t: 'time' }, { k: 'end', l: 'Giờ kết thúc', t: 'time' }, { k: 'multiplier', l: 'Hệ số lương', t: 'number', step: '0.05' }]);
+};
+
+/* ---------- Phân ca ---------- */
+views.assign = async () => {
+  const [shifts, emps] = await Promise.all([api('/shifts'), api('/employees')]);
+  const act_ = emps.filter((e) => e.active);
+  $('#main').innerHTML = `<h2 class="t">Phân ca trực</h2>
+  <div class="tbl" style="padding:18px;margin-bottom:18px"><div class="bar">
+    <label>Ngày<input type="date" id="ad" value="${addDays(1)}"></label>
+    <label>Ca<select id="as">${shifts.map((s) => `<option value="${s._id}">${esc(s.name)} (${s.start}–${s.end})</option>`).join('')}</select></label>
+  </div>
+  <label>Nhân viên<div class="multi">${act_.map((e) => `<label class="chk"><input type="checkbox" value="${e._id}"> ${esc(e.fullName)} — ${esc(e.department?.name)}</label>`).join('')}</div></label>
+  <p><button class="btn" id="go">Phân ca</button></p></div>
+  <div class="bar"><label>Từ<input type="date" id="f" value="${today()}"></label><label>Đến<input type="date" id="t" value="${addDays(7)}"></label><button class="btn ghost" id="ld">Xem lịch</button></div>
+  <div id="list"></div>`;
+  const load = act(async () => {
+    const rows = await api(`/schedule?from=${$('#f').value}&to=${$('#t').value}`);
+    $('#list').innerHTML = table([
+      { h: 'Ngày', f: (r) => r.schedule.date.split('-').reverse().join('/') }, { h: 'Ca', f: (r) => esc(r.schedule.shift.name) },
+      { h: 'Nhân viên', f: (r) => esc(r.employee.fullName) }, { h: 'Trạng thái', f: (r) => tag(r.status) },
+      { h: '', f: (r) => r.status === 'pending' ? `<button class="btn bad sm" data-rm="${r._id}">Gỡ</button>` : '' },
+    ], rows, 'Chưa có lịch trong khoảng này');
+  });
+  $('#ld').onclick = load; load();
+  $('#list').onclick = act(async (e) => { if (e.target.dataset.rm) { await api('/attendance/' + e.target.dataset.rm, 'DELETE'); load(); } });
+  $('#go').onclick = act(async () => {
+    const ids = [...document.querySelectorAll('.multi input:checked')].map((c) => c.value);
+    const r = await api('/schedule/assign', 'POST', { shiftId: $('#as').value, date: $('#ad').value, employeeIds: ids });
+    toast(`Đã phân ${r.added.length} người.` + (r.errors.length ? ' Lỗi: ' + r.errors.join('; ') : ''), r.errors.length && !r.added.length);
+    load();
+  });
+};
+
+/* ---------- Chấm công (HR) ---------- */
+views.attendance = async () => {
+  $('#main').innerHTML = `<h2 class="t">Chấm công</h2>
+  <div class="bar"><label>Từ<input type="date" id="f" value="${addDays(-7)}"></label><label>Đến<input type="date" id="t" value="${today()}"></label>
+  <button class="btn ghost" id="ld">Xem</button><button class="btn" id="ab">Chốt vắng mặt theo ngày “Đến”</button></div><div id="list"></div>`;
+  const load = act(async () => {
+    const rows = (await api(`/attendance?from=${$('#f').value}&to=${$('#t').value}`)).sort((a, b) => b.schedule.date.localeCompare(a.schedule.date));
+    $('#list').innerHTML = table([
+      { h: 'Ngày', f: (r) => r.schedule.date.split('-').reverse().join('/') }, { h: 'Nhân viên', f: (r) => esc(r.employee.fullName) },
+      { h: 'Khoa/phòng', f: (r) => esc(r.employee.department?.name) }, { h: 'Ca', f: (r) => esc(r.schedule.shift.name) },
+      { h: 'Vào', f: (r) => dt(r.checkIn) }, { h: 'Ra', f: (r) => dt(r.checkOut) }, { h: 'Trạng thái', f: (r) => tag(r.status) }, { h: 'Vi phạm', f: (r) => esc(r.violation || '—') },
+      { h: '', f: (r) => r.status === 'absent' || r.checkOut ? '' : `<button class="btn ghost sm" data-m="${r.employee._id}|${r.schedule._id}|${r.checkIn ? 'checkout' : 'checkin'}">${r.checkIn ? 'Nhập giờ ra' : 'Nhập giờ vào'}</button>` },
+    ], rows, 'Không có dữ liệu');
+  });
+  $('#ld').onclick = load; load();
+  $('#ab').onclick = act(async () => { const r = await api('/attendance/close-absent', 'POST', { date: $('#t').value }); toast(`Đã đánh dấu vắng ${r.marked} lượt`); load(); });
+  $('#list').onclick = (e) => {
+    const m = e.target.dataset.m; if (!m) return;
+    const [employeeId, scheduleId, kind] = m.split('|');
+    form(kind === 'checkin' ? 'Nhập giờ vào thủ công' : 'Nhập giờ ra thủ công', [{ k: 'time', l: 'Thời điểm', t: 'datetime-local' }], null,
+      async (o) => { await api('/attendance/' + kind, 'POST', { employeeId, scheduleId, time: new Date(o.time).toISOString() }); toast('Đã ghi nhận'); load(); });
+  };
+};
+
+/* ---------- Bảng lương ---------- */
+views.payroll = async () => {
+  $('#main').innerHTML = `<h2 class="t">Bảng lương</h2>
+  <div class="bar"><label>Tháng<input type="month" id="m" value="${today().slice(0, 7)}"></label>
+  <button class="btn" id="calc">Tính lương tháng</button><button class="btn ghost" id="appr">Duyệt tất cả</button><button class="btn ghost" id="csv">Xuất CSV</button></div><div id="list"></div>`;
+  let rows = [];
+  const load = act(async () => {
+    rows = (await api('/payroll?month=' + $('#m').value)).sort((a, b) => a.employee.fullName.localeCompare(b.employee.fullName, 'vi'));
+    const sum = rows.reduce((s, r) => s + r.netSalary, 0);
+    $('#list').innerHTML = table([
+      { h: 'Mã', f: (r) => esc(r.employee.code) }, { h: 'Nhân viên', f: (r) => esc(r.employee.fullName) }, { h: 'Khoa/phòng', f: (r) => esc(r.employee.department?.name) },
+      { h: 'Tiền ca', n: 1, f: (r) => money(r.totalShiftPay) }, { h: 'Phụ cấp', n: 1, f: (r) => money(r.allowanceSnapshot) },
+      { h: 'Phạt', n: 1, f: (r) => money(r.totalFines) }, { h: 'Thực nhận', n: 1, f: (r) => `<b>${money(r.netSalary)}</b>` }, { h: 'Trạng thái', f: (r) => tag(r.status) },
+      { h: '', f: (r) => r.status === 'draft' ? `<button class="btn sm" data-s="approved|${r._id}">Duyệt</button>` : r.status === 'approved' ? `<button class="btn ghost sm" data-s="paid|${r._id}">Đã trả</button>` : '' },
+    ], rows, 'Chưa có bảng lương. Bấm “Tính lương tháng”.') + (rows.length ? `<p style="text-align:right">Tổng quỹ lương: <b>${money(sum)}</b></p>` : '');
+  });
+  $('#m').onchange = load; load();
+  $('#calc').onclick = act(async () => { const r = await api('/payroll/calculate', 'POST', { month: $('#m').value }); toast(`Đã tính ${r.calculated} phiếu` + (r.skipped ? `, bỏ qua ${r.skipped} phiếu đã duyệt` : '')); load(); });
+  $('#appr').onclick = act(async () => { const r = await api('/payroll/approve-all', 'POST', { month: $('#m').value }); toast(`Đã duyệt ${r.approved} phiếu`); load(); });
+  $('#list').onclick = act(async (e) => { const s = e.target.dataset.s; if (s) { const [st, id] = s.split('|'); await api(`/payroll/${id}/status`, 'POST', { status: st }); load(); } });
+  $('#csv').onclick = () => {
+    const h = ['Mã', 'Họ tên', 'Khoa/phòng', 'Tiền ca', 'Phụ cấp', 'Phạt', 'Thực nhận', 'Trạng thái'];
+    const lines = rows.map((r) => [r.employee.code, r.employee.fullName, r.employee.department?.name, r.totalShiftPay, r.allowanceSnapshot, r.totalFines, r.netSalary, STATUS[r.status]].map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + [h.join(','), ...lines].join('\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = `bang-luong-${$('#m').value}.csv`; a.click();
+  };
+};
+
+/* ---------- Báo cáo ---------- */
+views.reports = async () => {
+  $('#main').innerHTML = `<h2 class="t">Báo cáo</h2><div class="bar"><label>Tháng<input type="month" id="m" value="${today().slice(0, 7)}"></label></div>
+  <h3>Chuyên cần theo khoa/phòng</h3><div id="r1"></div><h3>Nhân viên vi phạm nhiều nhất</h3><div id="r2"></div><h3>Chi phí nhân sự theo tháng</h3><div id="r3"></div>`;
+  const load = act(async () => {
+    const [a, c] = await Promise.all([api('/reports/attendance?month=' + $('#m').value), api('/reports/cost')]);
+    $('#r1').innerHTML = table([
+      { h: 'Khoa/phòng', f: (r) => esc(r.department) }, { h: 'Tổng lượt', n: 1, f: (r) => r.total }, { h: 'Đúng giờ', n: 1, f: (r) => r.on_time },
+      { h: 'Đi muộn', n: 1, f: (r) => r.late }, { h: 'Về sớm', n: 1, f: (r) => r.early_leave }, { h: 'Muộn + sớm', n: 1, f: (r) => r.late_and_early }, { h: 'Vắng', n: 1, f: (r) => r.absent },
+    ], a.departments, 'Chưa có dữ liệu chấm công tháng này');
+    $('#r2').innerHTML = table([
+      { h: 'Nhân viên', f: (r) => esc(r.name) }, { h: 'Khoa/phòng', f: (r) => esc(r.department) }, { h: 'Số lần', n: 1, f: (r) => r.count }, { h: 'Tiền phạt dự kiến', n: 1, f: (r) => money(r.fines) },
+    ], a.violators, 'Không có vi phạm');
+    $('#r3').innerHTML = table([
+      { h: 'Tháng', f: (r) => r._id }, { h: 'Số nhân viên', n: 1, f: (r) => r.employees }, { h: 'Tổng quỹ lương', n: 1, f: (r) => money(r.total) },
+      { h: 'Trung bình', n: 1, f: (r) => money(r.avg) }, { h: 'Cao nhất', n: 1, f: (r) => money(r.max) }, { h: 'Thấp nhất', n: 1, f: (r) => money(r.min) },
+    ], c, 'Chưa có bảng lương nào');
+  });
+  $('#m').onchange = load; load();
+};
+
+boot();
+</script>
+</body>
+</html>

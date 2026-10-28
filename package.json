@@ -1,0 +1,14 @@
+{
+  "name": "hospital-hr-mysql",
+  "version": "1.0.0",
+  "description": "Hệ thống quản lý nhân sự bệnh viện (Node.js + MySQL)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "seed": "node seed.js" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.0"
+  }
+}
