@@ -48,8 +48,8 @@ Báo cáo gồm: thống kê chuyên cần theo khoa/phòng, danh sách nhân vi
 
 ```bash
 # 1. Lấy mã nguồn
-git clone https://github.com/vminhnm/hms.git
-cd hms
+git clone https://github.com/<tên-tài-khoản>/hospital-hr-mysql.git
+cd hospital-hr-mysql
 
 # 2. Tạo cơ sở dữ liệu, bảng, trigger, procedure
 mysql -u root -p < schema.sql
@@ -109,7 +109,7 @@ thực nhận  = max(tiền ca + phụ cấp snapshot − tiền phạt, 0)
 
 ## Cấu trúc thư mục
 ```
-hms/
+hospital-hr-mysql/
 ├── public/
 │   └── index.html      # Giao diện web
 ├── schema.sql          # Bảng, index, trigger, stored procedure
@@ -144,5 +144,3 @@ Mọi API (trừ đăng nhập) cần header `Authorization: Bearer <token>`.
 - Chưa có chức năng đổi mật khẩu và quản lý tài khoản riêng.
 - Chưa có kiểm thử tự động.
 
-## Giấy phép
-Phát hành theo giấy phép [MIT](LICENSE).
